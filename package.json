@@ -1,0 +1,30 @@
+{
+  "name": "espider",
+  "version": "1.0.0",
+  "description": "a spider for e's words",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/OrangeSAM/ESpider.git"
+  },
+  "keywords": [
+    "spider",
+    "etf",
+    "words"
+  ],
+  "author": "SamLiu",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/OrangeSAM/ESpider/issues"
+  },
+  "homepage": "https://github.com/OrangeSAM/ESpider#readme",
+  "dependencies": {
+    "cheerio": "^1.0.0-rc.10",
+    "node-fetch": "^3.2.1",
+    "puppeteer-core": "^13.4.1"
+  }
+}
