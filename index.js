@@ -7,6 +7,8 @@
 import * as cheerio from 'cheerio';
 import fetch from "node-fetch"
 import fs from 'fs'
+import puppeteer from 'puppeteer-core'
+
 
 import {module, wordsType, siteUrl, requestHeader} from "./config.js";
 
@@ -37,21 +39,48 @@ for (let i = 0; i < articleListOrigin.length; i++) {
 // 计数
 let count = 0
 
+// 由于内容渲染机制的不同,官方标注的金句可以直接通过请求获得，而热门划线和个人划线无法通过此方法获得
 // 获取每篇文章的划线句
-articleList.forEach(async function (item) {
-  const articlePage = await fetch(`${siteUrl}${item.url}`, requestHeader)
-  const articlePageContent = cheerio.default.load(await articlePage.text())
+if(['hotLine', 'personal'].includes('hotLine')) {
+  // 打开一个浏览器
+  const browser = await puppeteer.launch({
+    executablePath: './chrome-win/chrome.exe',
+  });
 
-  // 获取所有标注的内容
-  const markContentArr = articlePageContent('em')
+  async function getMarkSentence(item) {
+    const page = await browser.newPage()
+    await page.goto(`${siteUrl}${item.url}`, {waitUntil: 'networkidle0'})
 
-  item.markContent = []
+    // 获取目标内容
+    const selector = args[1] === 'hotLine' ? '.zx-rangy-hot' : '.zx-rangy-mark'
+    item.markContent = await page.$$eval(selector, function getText(ele) {
+      return ele.map(e => e.innerText)
+    })
 
-  for (let i = 0; i < markContentArr.length; i++) {
-    item.markContent.push(markContentArr.eq(i).text())
+    count +=1
   }
-  count +=1
-})
+
+  // 处理所有文章
+  articleList.forEach(e => {
+    getMarkSentence(e)
+  })
+} else {
+  articleList.forEach(async function (item) {
+    const articlePage = await fetch(`${siteUrl}${item.url}`, requestHeader)
+    const articlePageContent = cheerio.default.load(await articlePage.text())
+
+    // 获取所有标注的内容
+    const markContentArr = articlePageContent('em')
+
+    item.markContent = []
+
+    for (let i = 0; i < markContentArr.length; i++) {
+      item.markContent.push(markContentArr.eq(i).text())
+    }
+    count +=1
+  })
+}
+
 
 // 生成文件
 function writeFile() {
@@ -77,6 +106,4 @@ const waitForWrite = setInterval(() => {
   } else {
     console.log('打印中，请稍后...  :)')
   }
-
 }, 2000)
-
