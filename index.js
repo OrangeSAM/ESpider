@@ -36,12 +36,14 @@ for (let i = 0; i < articleListOrigin.length; i++) {
   })
 }
 
+console.log(`共计${articleList.length}篇文章，打印将马上进行。`)
+
 // 计数
 let count = 0
 
 // 由于内容渲染机制的不同,官方标注的金句可以直接通过请求获得，而热门划线和个人划线无法通过此方法获得
 // 获取每篇文章的划线句
-if(['hotLine', 'personal'].includes('hotLine')) {
+if(['hotLine', 'personal'].includes(args[1])) {
   // 打开一个浏览器
   const browser = await puppeteer.launch({
     executablePath: './chrome-win/chrome.exe',
